@@ -24,8 +24,16 @@ module.exports = {
 
     const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     try {
-      await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
-      console.log(`✅ ${commands.length} comandos registrados globalmente`);
+      if (process.env.GUILD_ID) {
+        await rest.put(
+          Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+          { body: commands }
+        );
+        console.log(`✅ ${commands.length} comandos registrados no servidor ${process.env.GUILD_ID} (instantâneo)`);
+      } else {
+        await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
+        console.log(`✅ ${commands.length} comandos registrados globalmente (pode demorar até 1h para aparecer)`);
+      }
     } catch (err) {
       console.error('Erro ao registrar comandos:', err);
     }

@@ -97,6 +97,7 @@ async function getAIResponse(content, userId, client) {
 
 async function runSlaveAction(client, userId, action) {
   const user = getUser(userId);
+  if (!user.missions) user.missions = { fish: 0, plant: 0, hunt: 0 };
   const now = Date.now();
   try {
     if (action === 'pescar') {

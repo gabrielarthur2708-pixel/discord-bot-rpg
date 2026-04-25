@@ -113,8 +113,9 @@ async function handleAdmAction(interaction) {
 async function handleAdmModal(interaction) {
   if (!isAuthed(interaction.user.id)) return interaction.reply({ content: '❌ Sessão expirada!', ephemeral: true });
   const [, action] = interaction.customId.split(':');
-  const targetId = interaction.fields.fields.get('user_id')?.value?.replace(/[<@!>]/g, '').trim();
-  const value = interaction.fields.fields.get('value')?.value?.trim();
+  let targetId = null, value = null;
+  try { targetId = interaction.fields.getTextInputValue('user_id').replace(/[<@!>]/g, '').trim(); } catch {}
+  try { value = interaction.fields.getTextInputValue('value').trim(); } catch {}
   await interaction.deferReply({ ephemeral: true });
   try {
     if (action === 'dar_coins') { const u = getUser(targetId); u.coins = (u.coins||0)+parseInt(value); saveUser(targetId,u); return interaction.editReply(`✅ +${parseInt(value).toLocaleString('pt-BR')} moedas! Saldo: ${u.coins.toLocaleString('pt-BR')}`); }

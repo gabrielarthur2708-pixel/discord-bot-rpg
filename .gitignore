@@ -1,8 +1,4 @@
 node_modules/
-discord-bot/node_modules/
-discord-bot/data/
 .env
+data/
 *.log
-.cache/
-attached_assets/
-zipFile.zip

@@ -1,6 +1,15 @@
 const { Client, GatewayIntentBits, Collection, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits, StringSelectMenuBuilder } = require('discord.js');
 const fs = require('fs');
+const http = require('http');
 const path = require('path');
+
+const KEEP_ALIVE_PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is alive!');
+}).listen(KEEP_ALIVE_PORT, '0.0.0.0', () => {
+  console.log(`🌐 Keep-alive server rodando na porta ${KEEP_ALIVE_PORT}`);
+});
 
 const client = new Client({
   intents: [
@@ -39,5 +48,11 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
+
+// Global error handlers so the bot never dies silently
+process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));
+process.on('uncaughtException', (err) => console.error('Uncaught exception:', err));
+client.on('error', (err) => console.error('Client error:', err));
+client.on('shardError', (err) => console.error('Shard error:', err));
 
 client.login(process.env.DISCORD_TOKEN);

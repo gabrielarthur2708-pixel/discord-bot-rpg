@@ -39,6 +39,15 @@ function getUser(userId) {
       total_fish: 0,
       total_hunts: 0,
       total_plants: 0,
+      xp: 0,
+      level: 1,
+      rob_last: null,
+      rob_streak: 0,
+      robbed_count: 0,
+      jail_until: null,
+      total_robbed: 0,
+      total_gambled: 0,
+      total_won: 0,
       created_at: Date.now(),
     };
     saveDB('users', db);

@@ -56,3 +56,20 @@ async function handleButton(interaction, action, args) {
 }
 
 module.exports = { handleButton };
+
+// Sell all fish
+async function handleSellAll(interaction, args) {
+  const ownerId = args[0];
+  if (interaction.user.id !== ownerId) return interaction.reply({ content: '❌ Não é o seu inventário!', ephemeral: true });
+  const { getUser, saveUser } = require('../utils/database');
+  const user = getUser(interaction.user.id);
+  const fishInv = user.fish_inventory || [];
+  if (fishInv.length === 0) return interaction.reply({ content: '❌ Sem peixes para vender!', ephemeral: true });
+  const total = fishInv.reduce((a, f) => a + (f.value || 0), 0);
+  user.coins = (user.coins || 0) + total;
+  user.fish_inventory = [];
+  saveUser(interaction.user.id, user);
+  const { EmbedBuilder } = require('discord.js');
+  await interaction.update({ embeds: [new EmbedBuilder().setColor('#2ecc71').setTitle('💰 Todos os Peixes Vendidos!').setDescription(`Vendeu **${fishInv.length}** peixes por **${total.toLocaleString('pt-BR')} moedas**!\n💵 Saldo: **${user.coins.toLocaleString('pt-BR')}**`)], components: [] });
+}
+module.exports.handleSellAll = handleSellAll;

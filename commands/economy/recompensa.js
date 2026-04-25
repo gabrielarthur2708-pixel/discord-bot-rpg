@@ -4,8 +4,8 @@ const { formatTime } = require('../../utils/helpers');
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 const WEEKLY_COOLDOWN = 7 * 24 * 60 * 60 * 1000;
-const DAILY_REWARD = 1000;
-const WEEKLY_REWARD = 5000;
+const DAILY_REWARD = 200;
+const WEEKLY_REWARD = 800;
 
 module.exports = {
   data: new SlashCommandBuilder()
