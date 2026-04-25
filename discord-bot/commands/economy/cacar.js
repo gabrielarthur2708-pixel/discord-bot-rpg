@@ -1,55 +1,68 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getUser, saveUser } = require('../../utils/database');
 const { rollHunt, cooldownLeft, formatTime, randomChance, addXP } = require('../../utils/helpers');
 
 const HUNT_COOLDOWN = 30 * 60 * 1000;
 
 module.exports = {
-  data: new SlashCommandBuilder().setName('cacar').setDescription('🏹 Saia para caçar!'),
+  data: new SlashCommandBuilder().setName('cacar').setDescription('🏹 Saia para caçar na floresta!'),
 
   async execute(interaction) {
     const user = getUser(interaction.user.id);
     const cd = cooldownLeft(user.hunt_last, HUNT_COOLDOWN);
-    if (cd > 0) return interaction.reply({ content: `⏳ Aguarde **${formatTime(cd)}** para caçar novamente!`, ephemeral: true });
+    if (cd > 0) return interaction.reply({
+      embeds: [new EmbedBuilder().setColor('#e74c3c').setTitle('⏳ Cooldown').setDescription(`Você precisa descansar!\nPróxima caçada em **${formatTime(cd)}**`)],
+      ephemeral: true
+    });
 
-    await interaction.reply({ embeds: [new EmbedBuilder().setColor('#8b4513').setTitle('🏹 Caçando...').setDescription('Você entrou na floresta...\n\n🌲 *Pisadas na lama...*\n👁️ *Você vê algo se mexendo...*')] });
+    await interaction.reply({
+      embeds: [new EmbedBuilder().setColor('#8b4513').setTitle('🏹 Caçando...').setDescription('Você entrou na floresta...\n\n🌲 *Pisadas na lama...*\n👁️ *Você vê algo se mexendo nas sombras...*')]
+    });
     await new Promise(r => setTimeout(r, 2500));
 
     if (randomChance(15)) {
       user.hunt_last = Date.now();
       saveUser(interaction.user.id, user);
-      return interaction.editReply({ embeds: [new EmbedBuilder().setColor('#ff6b6b').setTitle('🏹 Caçada Frustrada!').setDescription('A presa fugiu antes de você chegar! 😤\nA floresta estava silenciosa...')] });
+      return interaction.editReply({
+        embeds: [new EmbedBuilder().setColor('#e74c3c').setTitle('🏹 A presa fugiu!').setDescription('Que pena! O animal era mais rápido...\nTente novamente mais tarde! 😤').setFooter({ text: `Próxima caçada em ${formatTime(HUNT_COOLDOWN)}` })]
+      });
     }
 
     const animal = rollHunt(user.pet === 'wolf', user.job === 'hunter');
-    user.coins = (user.coins || 0) + animal.coins;
+    user.hunt_last = Date.now();
     user.missions.hunt = (user.missions.hunt || 0) + 1;
     user.total_hunts = (user.total_hunts || 0) + 1;
-    user.hunt_last = Date.now();
 
     let missionMsg = '';
     if (!user.missions_claimed.hunt && user.missions.hunt >= 3) {
-      user.coins += 1800;
+      user.coins = (user.coins || 0) + 1800;
       user.missions_claimed.hunt = true;
       missionMsg = '\n🎯 **Missão Completa!** +1800 moedas!';
     }
 
     const celebrate = animal.name === 'Dragão' ? '\n\n🐲 **DRAGÃO ABATIDO! LENDA!** 🐲' : animal.name === 'Urso' ? '\n\n🐻 **Que caçada épica!**' : '';
     const lv = addXP(user, 25);
+    user._pending_hunt = { animal, timestamp: Date.now() };
     saveUser(interaction.user.id, user);
 
     const colors = { 'Coelho':'#95a5a6','Cervo':'#27ae60','Lobo':'#8e44ad','Urso':'#e67e22','Dragão':'#e74c3c' };
 
-    await interaction.editReply({ embeds: [new EmbedBuilder()
+    const embed = new EmbedBuilder()
       .setColor(colors[animal.name] || '#8b4513')
-      .setTitle(`${animal.emoji} Caçada Bem-sucedida!`)
-      .setDescription(`Você caçou um **${animal.name}** ${animal.emoji}${celebrate}${missionMsg}`)
+      .setTitle('🏹 Captura!')
       .addFields(
-        { name: '💰 Recompensa', value: `${animal.coins.toLocaleString('pt-BR')} moedas`, inline: true },
-        { name: '💵 Saldo', value: `${user.coins.toLocaleString('pt-BR')} moedas`, inline: true },
-        { name: '🏹 Missão', value: `${user.missions.hunt}/3`, inline: true },
+        { name: '🎯 Captura', value: `${animal.emoji} **${animal.name}**`, inline: true },
+        { name: '⭐ Raridade', value: animal.name === 'Dragão' ? 'Lendário' : animal.name === 'Urso' ? 'Épico' : animal.name === 'Lobo' ? 'Raro' : 'Comum', inline: true },
+        { name: '💰 Valor de Venda', value: `${animal.coins.toLocaleString('pt-BR')} 🪙`, inline: true },
       )
-      .setFooter({ text: `Total de caças: ${user.total_hunts}${lv ? ` | ⬆️ Level ${lv}!` : ''}` })
-    ] });
+      .setDescription(`${celebrate}${missionMsg}`)
+      .setFooter({ text: `🏹 Caçada • Próxima em ${formatTime(HUNT_COOLDOWN)}${lv ? ` | ⬆️ Level ${lv}!` : ''}` });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`hunt_sell:${interaction.user.id}`).setLabel('💰 Vender Agora').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`hunt_keep:${interaction.user.id}`).setLabel('🎒 Guardar no Inventário').setStyle(ButtonStyle.Secondary),
+    );
+
+    await interaction.editReply({ embeds: [embed], components: [row] });
   }
 };

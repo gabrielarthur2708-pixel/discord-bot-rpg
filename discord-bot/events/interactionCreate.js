@@ -24,6 +24,7 @@ module.exports = {
       const [action,...args] = interaction.customId.split(':');
       try {
         if (action==='fish_keep'||action==='fish_sell') { const h=require('../handlers/fishHandler'); await h.handleButton(interaction,action,args); }
+        else if (action==='hunt_sell'||action==='hunt_keep') { const h=require('../handlers/huntHandler'); await h.handleButton(interaction,action,args); }
         else if (action==='pvp_accept'||action==='pvp_decline') { const h=require('../handlers/pvpHandler'); await h.handleButton(interaction,action,args); }
         else if (action==='giveaway_join') { const h=require('../handlers/giveawayHandler'); await h.handleButton(interaction,action,args); }
         else if (action==='inv_sell_all') { const h=require('../handlers/fishHandler'); await h.handleSellAll(interaction,args); }
