@@ -2,28 +2,20 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder().setName('ajuda').setDescription('📚 Lista todos os comandos'),
-
   async execute(interaction) {
     const embed = new EmbedBuilder()
       .setColor('#3498db')
-      .setTitle('📚 Comandos do Bot RPG')
+      .setTitle('📚 Lista de Comandos')
       .setThumbnail(interaction.client.user.displayAvatarURL())
       .addFields(
-        { name: '💰 Economia',
-          value: '`/pescar` 🎣 Pescar (30min CD)\n`/cacar` 🏹 Caçar (30min CD)\n`/fazenda ver/plantar/colher` 🌾\n`/cassino slot/moeda/roleta` 🎰\n`/recompensa diaria/semanal` 🎁\n`/roubar @user` 🦹\n`/pix @user valor` 💸' },
-        { name: '📊 Perfil & Social',
-          value: '`/perfil` 📊 Ver perfil completo\n`/saldo` 💰 Ver moedas e aura\n`/aura` ✨ Ver aura e título\n`/nivel` ⭐ Ver XP e nível\n`/inventario` 🎒 Ver inventário\n`/ranking` 🏆 Top 10 jogadores' },
-        { name: '🛒 Loja',
-          value: '`/loja pets` 🐾 Ver pets\n`/loja comprar_pet` 💳 Comprar pet\n`/loja trabalhos` 💼 Ver trabalhos\n`/loja escolher_trabalho` ✅ Escolher trabalho' },
-        { name: '⚔️ PvP & Diversão',
-          value: '`/pvp @usuario` ⚔️ Desafiar para duelo\n`/interacao abracar/beijar/rir/bater/dormir` 💬\n`/sorteio criar` 🎉 Criar sorteio\n`/sorteio listar` 📋 Ver sorteios' },
-        { name: '👑 Admin',
-          value: '`/adm [senha]` 👑 Painel admin\n`/mod ban/kick/mute/avisar/avisos` 🛡️' },
-        { name: '🤖 IA',
-          value: 'Mencione **@Lúmen** para conversar!\nEx: `@Lúmen oi tudo bem?`\nCom modo escravo ativo:\n`@Lúmen faz tudo pra mim` — automático!\n`@Lúmen pare` — para tudo' },
+        { name: '💰 Economia', value: '`/pescar` 🎣 Pescar (30min)\n`/cacar` 🏹 Caçar (30min)\n`/fazenda` 🌾 Fazenda\n`/cassino` 🎰 Apostar\n`/recompensa` 🎁 Daily/Semanal\n`/roubar` 🦹 Roubar\n`/pix` 💸 Transferir moedas' },
+        { name: '📊 Perfil', value: '`/perfil` 📊 Perfil completo\n`/saldo` 💰 Moedas e aura\n`/aura` ✨ Aura e título\n`/nivel` ⭐ XP e nível\n`/inventario` 🎒 Inventário\n`/ranking` 🏆 Top 10' },
+        { name: '🛒 Loja', value: '`/loja pets` 🐾 Ver pets\n`/loja comprar_pet` 💳 Comprar pet\n`/loja trabalhos` 💼 Ver trabalhos\n`/loja escolher_trabalho` ✅ Escolher' },
+        { name: '⚔️ PvP & Social', value: '`/pvp` ⚔️ Duelar\n`/interacao` 💬 Abraçar, beijar...\n`/sorteio` 🎉 Sorteios' },
+        { name: '👑 Admin', value: '`/adm [senha]` 👑 Painel admin\n`/mod` 🛡️ Moderação' },
+        { name: '🤖 IA', value: 'Mencione **@Lúmen** para conversar!\n`@Lúmen oi` `@Lúmen piada` `@Lúmen receita`\n`@Lúmen faz tudo pra mim` *(modo escravo)*\n`@Lúmen pare` *(para automático)*' },
       )
-      .setFooter({ text: 'Bot RPG • Divirta-se! 🎮' });
-
+      .setFooter({ text: '📚 Lúmen • Sistema de Economia' });
     return interaction.reply({ embeds: [embed] });
   }
 };

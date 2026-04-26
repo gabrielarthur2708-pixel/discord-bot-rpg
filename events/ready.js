@@ -77,7 +77,7 @@ module.exports = {
         console.log(`✅ ${commands.length} comandos registrados no servidor ${process.env.GUILD_ID} (instantâneo)`);
       } else {
         await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
-        console.log(`✅ ${commands.length} comandos registrados globalmente (pode demorar até 1h para aparecer)`);
+        console.log(`✅ ${commands.length} comandos registrados globalmente (pode demorar até 1h)`);
       }
     } catch (err) {
       console.error('Erro ao registrar comandos:', err);
