@@ -1,6 +1,8 @@
 const { EmbedBuilder } = require('discord.js');
+const { getVoiceConnection } = require('@discordjs/voice');
 const { getUser, saveUser } = require('../utils/database');
 const { runSlaveAction } = require('../utils/aiResponses');
+const { speak } = require('../utils/voiceTTS');
 
 const slaveTimers = new Map(); // userId -> { action: timeoutId }
 const slaveChannels = new Map(); // userId -> channel
@@ -146,10 +148,15 @@ module.exports = {
   async execute(message, client) {
     try {
     if (message.author.bot) return;
-    if (!message.mentions.has(client.user)) return;
+
+    const rawLower = message.content.toLowerCase().trim();
+    const startsWithName = /^(l[uú]men)\b[\s,!?:;-]*/i.test(message.content.trim());
+    const mentioned = message.mentions.has(client.user);
+    if (!mentioned && !startsWithName) return;
 
     const content = message.content
       .replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '')
+      .replace(/^(l[uú]men)\b[\s,!?:;-]*/i, '')
       .trim();
     const l = content.toLowerCase();
     const user = getUser(message.author.id);
@@ -220,6 +227,22 @@ module.exports = {
     await message.channel.sendTyping();
     await new Promise(r => setTimeout(r, 600 + Math.random() * 800));
     const response = brain(content);
+
+    // Stripped version for TTS (no markdown / emojis)
+    const ttsText = response
+      .replace(/[*_`>~|#]/g, '')
+      .replace(/\p{Extended_Pictographic}/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // If she's in a voice call in this guild, speak the response too
+    if (message.guild) {
+      const conn = getVoiceConnection(message.guild.id);
+      if (conn && ttsText) {
+        speak(message.guild.id, ttsText).catch(err => console.error('TTS reply error:', err.message));
+      }
+    }
+
     return message.reply({
       embeds: [new EmbedBuilder()
         .setColor('#3498db')
