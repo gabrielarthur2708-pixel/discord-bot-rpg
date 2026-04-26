@@ -1,7 +1,10 @@
 const { Client, GatewayIntentBits, Collection, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits, StringSelectMenuBuilder } = require('discord.js');
+const { generateDependencyReport } = require('@discordjs/voice');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+
+console.log('🔊 Voice deps:\n' + generateDependencyReport());
 
 const KEEP_ALIVE_PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {

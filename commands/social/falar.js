@@ -13,25 +13,27 @@ module.exports = {
         .setMaxLength(500)),
 
   async execute(interaction) {
+    // Defer IMEDIATAMENTE — qualquer coisa que demore vai estourar os 3s do Discord
+    await interaction.deferReply();
+
     const text = interaction.options.getString('texto').trim();
     if (!text) {
-      return interaction.reply({ content: '❌ Você precisa me dizer o que falar!', ephemeral: true });
+      return interaction.editReply({ content: '❌ Você precisa me dizer o que falar!' });
     }
 
     const connection = getVoiceConnection(interaction.guild.id);
     if (!connection) {
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [new EmbedBuilder()
           .setColor('#e74c3c')
           .setTitle('❌ Não estou em nenhuma call!')
           .setDescription('Entre numa call e use `/call` primeiro pra eu entrar 💜')],
-        ephemeral: true,
       });
     }
 
     try {
       await speak(interaction.guild.id, text);
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [new EmbedBuilder()
           .setColor('#9b59b6')
           .setTitle('🗣️ Falando na call...')
@@ -40,9 +42,8 @@ module.exports = {
       });
     } catch (err) {
       console.error('falar command error:', err);
-      return interaction.reply({
+      return interaction.editReply({
         content: `❌ Erro ao falar: ${err.message || 'desconhecido'}`,
-        ephemeral: true,
       });
     }
   },
